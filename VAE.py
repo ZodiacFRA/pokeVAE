@@ -128,7 +128,7 @@ class VAE(nn.Module):
         recons_loss =F.mse_loss(recons, input)
         kld_loss = torch.mean(-0.5 * torch.sum(1 + log_var - mu ** 2 - log_var.exp(), dim = 1), dim = 0)
 
-        loss = recons_loss + warmup_factor * kld_loss
+        loss = recons_loss + kld_loss
         return loss
         # return {'loss': loss, 'Reconstruction_Loss':recons_loss, 'KLD':-kld_loss}
 

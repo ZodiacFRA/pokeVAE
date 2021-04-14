@@ -5,7 +5,7 @@ DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 CUFA_KWARGS = {'num_workers': 1, 'pin_memory': True} if DEVICE == "cuda" else {}
 
 LEARNING_RATE = 0.001
-BATCH_SIZE = 32
+BATCH_SIZE = 64
 EPOCHS = 200
 LOG_INTERVAL = 10
 

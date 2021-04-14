@@ -4,12 +4,9 @@ import torch
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-from skimage.color import rgba2rgb
+from skimage.color import rgba2rgb, rgb2gray
 
 from utils import *
-
-def rgb2gray(rgb):
-    return np.dot(rgb[...,:3], [0.2989, 0.5870, 0.1140])
 
 
 class PokemonDataset(torch.utils.data.Dataset):
@@ -40,6 +37,7 @@ class PokemonDataset(torch.utils.data.Dataset):
         except ValueError:
             pass
         image = rgb2gray(image)
+        image = image[:64, :64]
         if self.transform:
             image = self.transform(image)
         return image

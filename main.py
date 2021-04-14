@@ -76,21 +76,15 @@ if __name__ == '__main__':
     optimizer = torch.optim.Adam(model.parameters(), lr=LEARNING_RATE)
 
     # Create 2D representation by varying the value of each latent variable
-    # n = 40
-    # big_sample = get_sample(n, -5, 5)
+    n = 40
+    big_sample = get_sample(n, -5, 5)
     # small_sample = get_sample(n, -1, 1)
-
-    # n=1
-    # one_shot = torch.FloatTensor(((0, 0))).to(DEVICE)
+    # os_sample = model.sample(10)
 
     for epoch in range(0, EPOCHS):
         warmup_factor = min(1, epoch / WARMUP_TIME)
         with torch.no_grad():
-            # res = model.decode(one_shot).cpu()
-            # res = model.decode(big_sample).cpu()
-            res = model.sample(10)
-            torchvision.utils.save_image(res.view(10, 1, 64, 64).cpu(), f"./results/reconstruction_{epoch}_{warmup_factor}_big.png", nrow=10)
-            # res = model.decode(small_sample).cpu()
-            # torchvision.utils.save_image(res.view(n*n, 3, 64, 64).cpu(), f"./results/reconstruction_{epoch}_{warmup_factor}_small.png", nrow=n)
+            res = model.decode(big_sample).cpu()
+            torchvision.utils.save_image(res.view(n*n, 1, 64, 64).cpu(), f"./results/reconstruction_{epoch}_{warmup_factor}_small.png", nrow=n)
 
         train(epoch, warmup_factor, model, optimizer, train_dataloader)

@@ -88,3 +88,5 @@ if __name__ == '__main__':
             torchvision.utils.save_image(res.view(n*n, 1, 64, 64).cpu(), f"./results/reconstruction_{epoch}_{warmup_factor}_small.png", nrow=n)
 
         train(epoch, warmup_factor, model, optimizer, train_dataloader)
+
+    torch.save(model.state_dict(), './1.pth')

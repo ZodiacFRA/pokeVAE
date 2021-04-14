@@ -24,7 +24,7 @@ class VAE(torch.nn.Module):
 
     def encode(self, x):
         h1 = torch.nn.functional.relu(self.fe1(x))
-        h1 = torch.nn.functional.relu(self.fe2(x))
+        h1 = torch.nn.functional.relu(self.fe2(h1))
         h1 = torch.nn.functional.relu(self.fe3(h1))
         h1 = torch.nn.functional.relu(self.fe4(h1))
         return self.mu(h1), self.logvar(h1)

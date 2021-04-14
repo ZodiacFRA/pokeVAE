@@ -9,7 +9,8 @@ class VAE(torch.nn.Module):
         self.pixels_nbr = image_size * image_size
         # Encoder
         self.fe1 = torch.nn.Linear(self.pixels_nbr, 2048)
-        self.fe3 = torch.nn.Linear(2048, 512)
+        self.fe2 = torch.nn.Linear(2048, 1024)
+        self.fe3 = torch.nn.Linear(1024, 512)
         self.fe4 = torch.nn.Linear(512, 256)
         # Latent
         self.mu = torch.nn.Linear(256, LATENT_SPACE_SIZE)
@@ -17,11 +18,13 @@ class VAE(torch.nn.Module):
         # Decoder
         self.fd1 = torch.nn.Linear(LATENT_SPACE_SIZE, 256)
         self.fd2 = torch.nn.Linear(256, 512)
-        self.fd3 = torch.nn.Linear(512, 2048)
+        self.fd3 = torch.nn.Linear(512, 1024)
+        self.fd4 = torch.nn.Linear(1024, 2048)
         self.fd5 = torch.nn.Linear(2048, self.pixels_nbr)
 
     def encode(self, x):
         h1 = torch.nn.functional.relu(self.fe1(x))
+        h1 = torch.nn.functional.relu(self.fe2(x))
         h1 = torch.nn.functional.relu(self.fe3(h1))
         h1 = torch.nn.functional.relu(self.fe4(h1))
         return self.mu(h1), self.logvar(h1)
@@ -30,6 +33,7 @@ class VAE(torch.nn.Module):
         h1 = torch.nn.functional.relu(self.fd1(z))
         h1 = torch.nn.functional.relu(self.fd2(h1))
         h1 = torch.nn.functional.relu(self.fd3(h1))
+        h1 = torch.nn.functional.relu(self.fd4(h1))
         return torch.sigmoid(self.fd5(h1))
 
     def forward(self, x):

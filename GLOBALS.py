@@ -6,9 +6,9 @@ CUFA_KWARGS = {'num_workers': 1, 'pin_memory': True} if DEVICE == "cuda" else {}
 
 LEARNING_RATE = 0.001
 BATCH_SIZE = 64
-EPOCHS = 100
+EPOCHS = 1000
 LOG_INTERVAL = 10
 
 LATENT_SPACE_SIZE = 2
 
-WARMUP_TIME = 25
+WARMUP_TIME = 100

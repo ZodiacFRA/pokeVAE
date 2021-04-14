@@ -54,21 +54,20 @@ if __name__ == '__main__':
             ToTensor()
         ]))
 
-    fig = plt.figure()
-
-    fig.patch.set_facecolor('#222222')
-    for i in range(len(face_dataset)):
-        sample = face_dataset[i]
-        print(i, sample.shape)
-        ax = plt.subplot(1, 4, i + 1)
-        plt.tight_layout()
-        ax.axis('off')
-        plt.imshow(sample)
-
-        if i == 3:
-            plt.show()
-            break
-    exit()
+    # fig = plt.figure()
+    # fig.patch.set_facecolor('#222222')
+    # for i in range(len(face_dataset)):
+    #     sample = face_dataset[i]
+    #     print(i, sample.shape)
+    #     ax = plt.subplot(1, 4, i + 1)
+    #     plt.tight_layout()
+    #     ax.axis('off')
+    #     plt.imshow(sample)
+    #
+    #     if i == 3:
+    #         plt.show()
+    #         break
+    # exit()
 
     train_dataloader = torch.utils.data.DataLoader(face_dataset, batch_size=BATCH_SIZE)
 

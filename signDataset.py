@@ -37,7 +37,10 @@ class PokemonDataset(torch.utils.data.Dataset):
 
         if self.transform:
             image = self.transform(image)
-        image = image[:64, :64, :1]
+        try:
+            image = image[:64, :64, :1]
+        except IndexError:
+            image = image[:64, :64, None]
         # image = rgb2gray(image)
         return image
 

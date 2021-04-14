@@ -9,7 +9,7 @@ import numpy as np
 
 from GLOBALS import *
 from VAE import VAE
-from PokemonDataset import PokemonDataset
+from signDataset import PokemonDataset
 from utils import *
 
 
@@ -46,13 +46,13 @@ def train(epoch, warmup_factor, model, optimizer, dataloader):
 
 if __name__ == '__main__':
     face_dataset = PokemonDataset(
-        csv_file='./pokemons/pokemon.csv',
-        root_dir='./pokemons/images',
+        root_dir='./dataset/',
         transform=transforms.Compose([
             Rescale(64),
             ToTensor()
         ]))
     # fig = plt.figure()
+    # fig.patch.set_facecolor('#222222')
     # for i in range(len(face_dataset)):
     #     sample = face_dataset[i]
     #
@@ -70,7 +70,7 @@ if __name__ == '__main__':
 
     train_dataloader = torch.utils.data.DataLoader(face_dataset, batch_size=BATCH_SIZE)
 
-    model = VAE(3).to(DEVICE)
+    model = VAE(1).to(DEVICE)
     optimizer = torch.optim.Adam(model.parameters(), lr=LEARNING_RATE)
 
     # Create 2D representation by varying the value of each latent variable

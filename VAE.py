@@ -63,7 +63,7 @@ class VAE(nn.Module):
                                                output_padding=1),
                             nn.BatchNorm2d(hidden_dims[-1]),
                             nn.LeakyReLU(),
-                            nn.Conv2d(hidden_dims[-1], out_channels= 3,
+                            nn.Conv2d(hidden_dims[-1], out_channels= in_channels,
                                       kernel_size= 3, padding= 1),
                             nn.Tanh())
 

@@ -28,7 +28,7 @@ def train(epoch, warmup_factor, model, optimizer, dataloader):
     train_loss = 0
     for batch_idx, data in enumerate(dataloader):
         data = data.to(DEVICE)
-        data = data.transpose(1, 3)
+        # data = data.transpose(1, 3)
         # print("data train", data.shape)
         optimizer.zero_grad()
         recon_batch, mu, logvar = model(data)
@@ -52,6 +52,7 @@ if __name__ == '__main__':
             Rescale(64),
             ToTensor()
         ]))
+
     # fig = plt.figure()
     # fig.patch.set_facecolor('#222222')
     # for i in range(len(face_dataset)):
@@ -71,7 +72,7 @@ if __name__ == '__main__':
 
     train_dataloader = torch.utils.data.DataLoader(face_dataset, batch_size=BATCH_SIZE)
 
-    model = VAE(1).to(DEVICE)
+    model = VAE(64).to(DEVICE)
     print(model)
     optimizer = torch.optim.Adam(model.parameters(), lr=LEARNING_RATE)
 

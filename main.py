@@ -29,7 +29,7 @@ def train(epoch, warmup_factor, model, optimizer, dataloader):
     for batch_idx, data in enumerate(dataloader):
         data = data.to(DEVICE)
         data = data.transpose(1, 3)
-        print("data train", data.shape)
+        # print("data train", data.shape)
         optimizer.zero_grad()
         recon_batch, mu, logvar = model(data)
         loss = model.loss_function(recon_batch, data, mu, logvar, warmup_factor)

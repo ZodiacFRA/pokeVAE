@@ -13,9 +13,10 @@ class VAE(nn.Module):
         super(VAE, self).__init__()
 
         modules = []
+        self.in_channels = in_channels
         if hidden_dims is None:
-            # self.hidden_dims = [32, 64, 128, 256, 512]
-            self.hidden_dims = [32, 64]
+            self.hidden_dims = [32, 64, 128, 256, 512]
+            # self.hidden_dims = [32]
         # Build Encoder
         for h_dim in self.hidden_dims:
             modules.append(
@@ -93,7 +94,7 @@ class VAE(nn.Module):
         :return: (Tensor) [B x C x H x W]
         """
         result = self.decoder_input(z)
-        print(result.shape)
+        # print(result.shape)
         result = result.view(-1, self.hidden_dims[0], 2, 2)
         result = self.decoder(result)
         result = self.final_layer(result)
@@ -134,7 +135,7 @@ class VAE(nn.Module):
         """
         z = torch.randn(num_samples, LATENT_SPACE_SIZE)
         z = z.to(DEVICE)
-        print("sample data", z.shape)
+        # print("sample data", z.shape)
         samples = self.decode(z)
         return samples
 

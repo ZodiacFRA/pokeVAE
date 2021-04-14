@@ -14,39 +14,39 @@ class VAE(nn.Module):
 
         modules = []
         if hidden_dims is None:
-            hidden_dims = [32, 64, 128, 256, 512]
-            # hidden_dims = [32, 64, 128, 256, 512]
+            # self.hidden_dims = [32, 64, 128, 256, 512]
+            self.hidden_dims = [32, 64]
         # Build Encoder
-        for h_dim in hidden_dims:
+        for h_dim in self.hidden_dims:
             modules.append(
                 nn.Sequential(
-                    nn.Conv2d(in_channels, out_channels=h_dim,
+                    nn.Conv2d(self.in_channels, out_channels=h_dim,
                               kernel_size=3, stride=2, padding=1),
                     nn.BatchNorm2d(h_dim),
                     nn.LeakyReLU())
             )
-            in_channels = h_dim
+            self.in_channels = h_dim
 
         self.encoder = nn.Sequential(*modules)
-        self.fc_mu = nn.Linear(hidden_dims[-1]*4, LATENT_SPACE_SIZE)
-        self.fc_var = nn.Linear(hidden_dims[-1]*4, LATENT_SPACE_SIZE)
+        self.fc_mu = nn.Linear(self.hidden_dims[-1]*4, LATENT_SPACE_SIZE)
+        self.fc_var = nn.Linear(self.hidden_dims[-1]*4, LATENT_SPACE_SIZE)
         # Build Decoder
         modules = []
 
-        self.decoder_input = nn.Linear(LATENT_SPACE_SIZE, hidden_dims[-1] * 4)
+        self.decoder_input = nn.Linear(LATENT_SPACE_SIZE, self.hidden_dims[-1] * 4)
 
-        hidden_dims.reverse()
+        self.hidden_dims.reverse()
 
-        for i in range(len(hidden_dims) - 1):
+        for i in range(len(self.hidden_dims) - 1):
             modules.append(
                 nn.Sequential(
-                    nn.ConvTranspose2d(hidden_dims[i],
-                                       hidden_dims[i + 1],
+                    nn.ConvTranspose2d(self.hidden_dims[i],
+                                       self.hidden_dims[i + 1],
                                        kernel_size=3,
                                        stride = 2,
                                        padding=1,
                                        output_padding=1),
-                    nn.BatchNorm2d(hidden_dims[i + 1]),
+                    nn.BatchNorm2d(self.hidden_dims[i + 1]),
                     nn.LeakyReLU())
             )
 
@@ -55,15 +55,15 @@ class VAE(nn.Module):
         self.decoder = nn.Sequential(*modules)
 
         self.final_layer = nn.Sequential(
-                            nn.ConvTranspose2d(hidden_dims[-1],
-                                               hidden_dims[-1],
+                            nn.ConvTranspose2d(self.hidden_dims[-1],
+                                               self.hidden_dims[-1],
                                                kernel_size=3,
                                                stride=2,
                                                padding=1,
                                                output_padding=1),
-                            nn.BatchNorm2d(hidden_dims[-1]),
+                            nn.BatchNorm2d(self.hidden_dims[-1]),
                             nn.LeakyReLU(),
-                            nn.Conv2d(hidden_dims[-1], out_channels= in_channels,
+                            nn.Conv2d(self.hidden_dims[-1], out_channels= 1,
                                       kernel_size= 3, padding= 1),
                             nn.Tanh())
 
@@ -93,7 +93,8 @@ class VAE(nn.Module):
         :return: (Tensor) [B x C x H x W]
         """
         result = self.decoder_input(z)
-        result = result.view(-1, 512, 2, 2)
+        print(result.shape)
+        result = result.view(-1, self.hidden_dims[0], 2, 2)
         result = self.decoder(result)
         result = self.final_layer(result)
         return result
@@ -124,8 +125,7 @@ class VAE(nn.Module):
         KLD = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp())
         return warmup_factor * KLD + recons_loss
 
-    def sample(self,
-               num_samples, **kwargs):
+    def sample(self, num_samples, **kwargs):
         """
         Samples from the latent space and return the corresponding
         image space map.
@@ -134,7 +134,7 @@ class VAE(nn.Module):
         """
         z = torch.randn(num_samples, LATENT_SPACE_SIZE)
         z = z.to(DEVICE)
-
+        print("sample data", z.shape)
         samples = self.decode(z)
         return samples
 

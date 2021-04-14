@@ -9,7 +9,7 @@ import numpy as np
 
 from GLOBALS import *
 from VAE import VAE
-from signDataset import PokemonDataset
+from PokemonDataset import PokemonDataset
 from utils import *
 
 
@@ -47,7 +47,8 @@ def train(epoch, warmup_factor, model, optimizer, dataloader):
 
 if __name__ == '__main__':
     face_dataset = PokemonDataset(
-        root_dir='./dataset/',
+        csv_file='./pokemons/pokemon.csv',
+        root_dir='./pokemons/images',
         transform=transforms.Compose([
             Rescale(64),
             ToTensor()

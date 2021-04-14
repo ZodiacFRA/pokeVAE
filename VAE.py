@@ -115,22 +115,32 @@ class VAE(nn.Module):
         z = self.reparameterize(mu, log_var)
         return self.decode(z), mu, log_var
 
-    def loss_function(self, recons, input, mu, log_var, warmup_factor, **kwargs):
-        """
-        Computes the VAE loss function.
-        KL(N(\mu, \sigma), N(0, 1)) = \log \frac{1}{\sigma} + \frac{\sigma^2 + \mu^2}{2} - \frac{1}{2}
-        :param args:
-        :param kwargs:
-        :return:
-        """
+    # def loss_function(self, recons, input, mu, log_var, warmup_factor, **kwargs):
+    #     """
+    #     Computes the VAE loss function.
+    #     KL(N(\mu, \sigma), N(0, 1)) = \log \frac{1}{\sigma} + \frac{\sigma^2 + \mu^2}{2} - \frac{1}{2}
+    #     :param args:
+    #     :param kwargs:
+    #     :return:
+    #     """
+    #
+    #     # kld_weight = kwargs['M_N'] # Account for the minibatch samples from the dataset
+    #     recons_loss =F.mse_loss(recons, input)
+    #     kld_loss = torch.mean(-0.5 * torch.sum(1 + log_var - mu ** 2 - log_var.exp(), dim = 1), dim = 0)
+    #
+    #     loss = recons_loss + kld_loss
+    #     return loss
+    #     # return {'loss': loss, 'Reconstruction_Loss':recons_loss, 'KLD':-kld_loss}
 
-        # kld_weight = kwargs['M_N'] # Account for the minibatch samples from the dataset
-        recons_loss =F.mse_loss(recons, input)
-        kld_loss = torch.mean(-0.5 * torch.sum(1 + log_var - mu ** 2 - log_var.exp(), dim = 1), dim = 0)
-
-        loss = recons_loss + kld_loss
-        return loss
-        # return {'loss': loss, 'Reconstruction_Loss':recons_loss, 'KLD':-kld_loss}
+    # Reconstruction + KL divergence losses summed over all elements and batch
+    def loss_function(self, recon_x, x, mu, logvar, warmup_factor):
+        recons_loss =F.mse_loss(recon_x, x)
+        # see Appendix B from VAE paper:
+        # Kingma and Welling. Auto-Encoding Variational Bayes. ICLR, 2014
+        # https://arxiv.org/abs/1312.6114
+        # 0.5 * sum(1 + log(sigma^2) - mu^2 - sigma^2)
+        KLD = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp())
+        return warmup_factor * KLD + recons_loss
 
     def sample(self,
                num_samples, **kwargs):

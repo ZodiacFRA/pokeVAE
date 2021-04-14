@@ -87,7 +87,7 @@ if __name__ == '__main__':
             # res = model.decode(one_shot).cpu()
             # res = model.decode(big_sample).cpu()
             res = model.sample(10)
-            torchvision.utils.save_image(res.view(10, 3, 64, 64).cpu(), f"./results/reconstruction_{epoch}_{warmup_factor}_big.png", nrow=10)
+            torchvision.utils.save_image(res.view(10, 1, 64, 64).cpu(), f"./results/reconstruction_{epoch}_{warmup_factor}_big.png", nrow=10)
             # res = model.decode(small_sample).cpu()
             # torchvision.utils.save_image(res.view(n*n, 3, 64, 64).cpu(), f"./results/reconstruction_{epoch}_{warmup_factor}_small.png", nrow=n)
 

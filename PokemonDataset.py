@@ -8,6 +8,9 @@ from skimage.color import rgba2rgb
 
 from utils import *
 
+def rgb2gray(rgb):
+    return np.dot(rgb[...,:3], [0.2989, 0.5870, 0.1140])
+
 
 class PokemonDataset(torch.utils.data.Dataset):
     def __init__(self, csv_file, root_dir, transform=None):
@@ -36,7 +39,7 @@ class PokemonDataset(torch.utils.data.Dataset):
             image = rgba2rgb(image)
         except ValueError:
             pass
-
+        image = rgb2gray(image)
         if self.transform:
             image = self.transform(image)
         return image

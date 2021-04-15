@@ -64,7 +64,7 @@ def draw_dataset_sample(train_dataset):
 def predict(model, sample, epoch):
     with torch.no_grad():
         res = model.decode(sample).cpu()
-        torchvision.utils.save_image(res.view(n*n, 1, 64, 64).cpu(), f"./results/reconstruction_{epoch}_{warmup_factor}_small.png", nrow=n)
+        torchvision.utils.save_image(res.view(n*n, 1, 64, 64).cpu(), f"./results/reconstruction_{epoch}.png", nrow=n)
 
 
 if __name__ == '__main__':

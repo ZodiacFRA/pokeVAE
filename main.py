@@ -61,7 +61,7 @@ def draw_dataset_sample(train_dataset):
             break
 
 
-def predict(model, sample, epoch):
+def predict(model, sample, epoch, n):
     with torch.no_grad():
         res = model.decode(sample).cpu()
         torchvision.utils.save_image(res.view(n*n, 1, 64, 64).cpu(), f"./results/reconstruction_{epoch}.png", nrow=n)
@@ -83,7 +83,7 @@ if __name__ == '__main__':
 
     # Create 2D representation by varying the value of each latent variable
     n = 40
-    big_sample = get_sample(n, -5, 5)
+    big_sample = get_sample(n, -7, 7)
     # os_sample = model.sample(10)
 
     if len(sys.argv) == 1:
@@ -91,11 +91,11 @@ if __name__ == '__main__':
         for epoch in range(0, EPOCHS):
             warmup_factor = min(1, epoch / WARMUP_TIME)
             if epoch % LOG_INTERVAL == 0:
-                predict(model, big_sample, epoch)
+                predict(model, big_sample, epoch, n)
             train(epoch, warmup_factor, model, optimizer, train_dataloader)
         torch.save(model.state_dict(), f'./{time.time()}.pth')
     else:
         print("testing")
         model.load_state_dict(torch.load(sys.argv[1]))
         model.eval()
-        predict(model, big_sample, '0')
+        predict(model, big_sample, '0', n)

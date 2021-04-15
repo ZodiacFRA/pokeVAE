@@ -15,16 +15,6 @@ from PokemonDataset import PokemonDataset
 from utils import *
 
 
-def get_sample(n, start, end):
-    props = []
-    xl = np.arange(start, end, (end - start)/n)
-    yl = np.arange(start, end, (end - start)/n)
-    for x in xl:
-        for y in yl:
-            props.append((x, y))
-    return torch.FloatTensor(props).to(DEVICE)
-
-
 def train(epoch, warmup_factor, model, optimizer, dataloader):
     model.train()
     train_loss = 0
@@ -67,6 +57,16 @@ def predict(model, sample, epoch, n):
         torchvision.utils.save_image(res.view(n*n, 1, 64, 64).cpu(), f"./results/reconstruction_{epoch}.png", nrow=n)
 
 
+def get_sample(n, start, end):
+    props = []
+    xl = np.arange(start[0], end[0], (end[0] - start[0])/n)
+    yl = np.arange(start[1], end[1], (end[1] - start[1])/n)
+    for x in xl:
+        for y in yl:
+            props.append((x, y))
+    return torch.FloatTensor(props).to(DEVICE)
+
+
 if __name__ == '__main__':
     train_dataset = PokemonDataset(
         csv_file='./pokemons/pokemon.csv',
@@ -83,7 +83,7 @@ if __name__ == '__main__':
 
     # Create 2D representation by varying the value of each latent variable
     n = 40
-    big_sample = get_sample(n, -7, 7)
+    big_sample = get_sample(n, (-7, 7), (-2, 7))
     # os_sample = model.sample(10)
 
     if len(sys.argv) == 1:

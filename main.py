@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import sys
+import time
 from pprint import pprint
 
 import torch
@@ -91,7 +92,7 @@ if __name__ == '__main__':
             if epoch % LOG_INTERVAL == 0:
                 predict(model, big_sample)
             train(epoch, warmup_factor, model, optimizer, train_dataloader)
-        torch.save(model.state_dict(), './1.pth')
+        torch.save(model.state_dict(), f'./{time.time()}.pth')
     else:
         model.load_state_dict(torch.load(sys.argv[1]))
         model.eval()

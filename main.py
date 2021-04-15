@@ -59,11 +59,8 @@ def predict(model, sample, epoch, n):
 
 def get_sample(n, start, end):
     props = []
-    print('@', n)
-    xl = np.arange(start[0], end[0], (end[0] - start[0]) / 40)
-    print('@', n)
-    yl = np.arange(start[1], end[1], (end[1] - start[1]) / 40)
-    print('@', n)
+    xl = np.arange(start[0], end[0], (end[0] - start[0]) / n)
+    yl = np.arange(start[1], end[1], (end[1] - start[1]) / n)
     for x in xl:
         for y in yl:
             props.append((x, y))
@@ -86,9 +83,7 @@ if __name__ == '__main__':
 
     # Create 2D representation by varying the value of each latent variable
     n = 40
-    print(n, 'fijoeij')
-    big_sample = get_sample(n, (-7, 7), (-2, 7))
-    print('lfiejilejf')
+    big_sample = get_sample(n, (-7, -7), (7, 7))
     # os_sample = model.sample(10)
 
     if len(sys.argv) == 1:
@@ -100,7 +95,7 @@ if __name__ == '__main__':
             train(epoch, warmup_factor, model, optimizer, train_dataloader)
         torch.save(model.state_dict(), f'./{time.time()}.pth')
     else:
-        print("testing", n)
+        print("testing")
         model.load_state_dict(torch.load(sys.argv[1]))
         model.eval()
         predict(model, get_sample(n, (-7, 7), (-2, 7)), '0', n)

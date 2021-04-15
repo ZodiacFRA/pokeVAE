@@ -35,7 +35,7 @@ def train(epoch, warmup_factor, model, optimizer, dataloader):
 if __name__ == '__main__':
     image_size = 64
     train_dataset = PokemonDataset(
-        draw_samples=True,
+        draw_samples=False,
         csv_file='./pokemons/pokemon.csv',
         root_dir='./pokemons/images',
         transform=torchvision.transforms.Compose([

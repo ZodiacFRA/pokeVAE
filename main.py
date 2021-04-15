@@ -95,7 +95,7 @@ if __name__ == '__main__':
             train(epoch, warmup_factor, model, optimizer, train_dataloader)
         torch.save(model.state_dict(), f'./{time.time()}.pth')
     else:
-        print("testing")
+        print("testing", n)
         model.load_state_dict(torch.load(sys.argv[1]))
         model.eval()
         predict(model, get_sample(n, (-7, 7), (-2, 7)), '0', n)

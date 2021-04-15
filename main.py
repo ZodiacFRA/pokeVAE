@@ -60,9 +60,9 @@ def predict(model, sample, epoch, n):
 def get_sample(n, start, end):
     props = []
     print('@', n)
-    xl = np.arange(start[0], end[0], (end[0] - start[0]) / n)
+    xl = np.arange(start[0], end[0], (end[0] - start[0]) / 40)
     print('@', n)
-    yl = np.arange(start[1], end[1], (end[1] - start[1]) / n)
+    yl = np.arange(start[1], end[1], (end[1] - start[1]) / 40)
     print('@', n)
     for x in xl:
         for y in yl:

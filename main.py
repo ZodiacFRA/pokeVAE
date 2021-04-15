@@ -26,10 +26,7 @@ def train(epoch, warmup_factor, model, optimizer, dataloader):
         train_loss += loss.item()
         optimizer.step()
         if batch_idx % LOG_INTERVAL == 0:
-            print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
-                epoch, batch_idx * len(data), len(dataloader.dataset),
-                100. * batch_idx / len(dataloader),
-                loss.item() / len(data)))
+            print(f'Train Epoch: {epoch} [{batch_idx * len(data)}/{len(dataloader.dataset)} ({100. * batch_idx / len(dataloader):.0f}%)]\tLoss: {loss.item() / len(data):.6f}')
     print(f"====> Epoch: {epoch} Average loss: {(train_loss / len(dataloader.dataset)):.4f}, Warmup Factor: {warmup_factor}")
 
 

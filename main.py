@@ -83,6 +83,7 @@ if __name__ == '__main__':
 
     # Create 2D representation by varying the value of each latent variable
     n = 40
+    print(n, 'fijoeij')
     big_sample = get_sample(n, (-7, 7), (-2, 7))
     # os_sample = model.sample(10)
 

@@ -83,4 +83,4 @@ if __name__ == '__main__':
         model.load_state_dict(torch.load(sys.argv[1]))
         model.eval()
         # y / x
-        predict_line(model, rand_sample, 'Test', n_samples)
+        predict_square(model, rand_sample, 'Test', n_samples)

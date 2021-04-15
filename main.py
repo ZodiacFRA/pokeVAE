@@ -21,7 +21,7 @@ def train(epoch, warmup_factor, model, optimizer, dataloader):
         recon_batch, mu, logvar = model(data)
         loss = model.loss_function(recon_batch, data, mu, logvar, warmup_factor)
         loss.backward()
-        torch.nn.utils.clip_grad_norm_(model.parameters(), 50000.0)
+        torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
         train_loss += loss.item()
         optimizer.step()
         if batch_idx % LOG_INTERVAL == 0:

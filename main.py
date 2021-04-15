@@ -67,7 +67,7 @@ if __name__ == '__main__':
                 )
 
             train(epoch, warmup_factor, model, optimizer, train_dataloader)
-            torch.nn.utils.clip_grad_value_(model.parameters(), 100_000)
+            torch.nn.utils.clip_grad_value_(model.parameters(), 5_000)
 
         torch.save(model.state_dict(), f'./{time.time()}.pth')
     else:

@@ -61,7 +61,7 @@ def draw_dataset_sample(train_dataset):
             break
 
 
-def predict(model, sample):
+def predict(model, sample, epoch):
     with torch.no_grad():
         res = model.decode(sample).cpu()
         torchvision.utils.save_image(res.view(n*n, 1, 64, 64).cpu(), f"./results/reconstruction_{epoch}_{warmup_factor}_small.png", nrow=n)
@@ -91,11 +91,11 @@ if __name__ == '__main__':
         for epoch in range(0, EPOCHS):
             warmup_factor = min(1, epoch / WARMUP_TIME)
             if epoch % LOG_INTERVAL == 0:
-                predict(model, big_sample)
+                predict(model, big_sample, epoch)
             train(epoch, warmup_factor, model, optimizer, train_dataloader)
         torch.save(model.state_dict(), f'./{time.time()}.pth')
     else:
         print("testing")
         model.load_state_dict(torch.load(sys.argv[1]))
         model.eval()
-        predict(model, big_sample)
+        predict(model, big_sample, '0')

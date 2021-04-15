@@ -76,6 +76,9 @@ if __name__ == '__main__':
             ToTensor()
         ]))
 
+    draw_dataset_sample(train_dataset)
+    exit()
+
     train_dataloader = torch.utils.data.DataLoader(train_dataset, batch_size=BATCH_SIZE)
     model = VAE(64).to(DEVICE)
     optimizer = torch.optim.Adam(model.parameters(), lr=LEARNING_RATE)

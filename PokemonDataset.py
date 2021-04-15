@@ -37,9 +37,9 @@ class PokemonDataset(torch.utils.data.Dataset):
         except ValueError:
             pass
         image = rgb2gray(image)
-        image = image[:64, :64]
         if self.transform:
             image = self.transform(image)
+        image = image[:64, :64]
         return image
 
 

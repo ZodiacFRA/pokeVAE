@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import sys
 from pprint import pprint
 
 import torch
@@ -41,12 +42,32 @@ def train(epoch, warmup_factor, model, optimizer, dataloader):
                 epoch, batch_idx * len(data), len(dataloader.dataset),
                 100. * batch_idx / len(dataloader),
                 loss.item() / len(data)))
-
     print(f"====> Epoch: {epoch} Average loss: {(train_loss / len(dataloader.dataset)):.4f}, Warmup Factor: {warmup_factor}")
 
 
+def draw_dataset_sample(train_dataset):
+    fig = plt.figure()
+    fig.patch.set_facecolor('#222222')
+    for i in range(len(train_dataset)):
+        sample = train_dataset[i]
+        print(i, sample.shape)
+        ax = plt.subplot(1, 4, i + 1)
+        plt.tight_layout()
+        ax.axis('off')
+        plt.imshow(sample)
+        if i == 3:
+            plt.show()
+            break
+
+
+def predict(model, sample):
+    with torch.no_grad():
+        res = model.decode(sample).cpu()
+        torchvision.utils.save_image(res.view(n*n, 1, 64, 64).cpu(), f"./results/reconstruction_{epoch}_{warmup_factor}_small.png", nrow=n)
+
+
 if __name__ == '__main__':
-    face_dataset = PokemonDataset(
+    train_dataset = PokemonDataset(
         csv_file='./pokemons/pokemon.csv',
         root_dir='./pokemons/images',
         transform=transforms.Compose([
@@ -54,39 +75,24 @@ if __name__ == '__main__':
             ToTensor()
         ]))
 
-    # fig = plt.figure()
-    # fig.patch.set_facecolor('#222222')
-    # for i in range(len(face_dataset)):
-    #     sample = face_dataset[i]
-    #     print(i, sample.shape)
-    #     ax = plt.subplot(1, 4, i + 1)
-    #     plt.tight_layout()
-    #     ax.axis('off')
-    #     plt.imshow(sample)
-    #
-    #     if i == 3:
-    #         plt.show()
-    #         break
-    # exit()
-
-    train_dataloader = torch.utils.data.DataLoader(face_dataset, batch_size=BATCH_SIZE)
-
+    train_dataloader = torch.utils.data.DataLoader(train_dataset, batch_size=BATCH_SIZE)
     model = VAE(64).to(DEVICE)
-    print(model)
     optimizer = torch.optim.Adam(model.parameters(), lr=LEARNING_RATE)
+    print(model)
 
     # Create 2D representation by varying the value of each latent variable
     n = 40
-    big_sample = get_sample(n, -3, 3)
-    # small_sample = get_sample(n, -1, 1)
+    big_sample = get_sample(n, -5, 5)
     # os_sample = model.sample(10)
 
-    for epoch in range(0, EPOCHS):
-        warmup_factor = min(1, epoch / WARMUP_TIME)
-        with torch.no_grad():
-            res = model.decode(big_sample).cpu()
-            torchvision.utils.save_image(res.view(n*n, 1, 64, 64).cpu(), f"./results/reconstruction_{epoch}_{warmup_factor}_small.png", nrow=n)
-
-        train(epoch, warmup_factor, model, optimizer, train_dataloader)
-
-    torch.save(model.state_dict(), './1.pth')
+    if len(sys.argv) == 1:
+        for epoch in range(0, EPOCHS):
+            warmup_factor = min(1, epoch / WARMUP_TIME)
+            if epoch % LOG_INTERVAL == 0:
+                predict(model, big_sample)
+            train(epoch, warmup_factor, model, optimizer, train_dataloader)
+        torch.save(model.state_dict(), './1.pth')
+    else:
+        model.load_state_dict(torch.load(sys.argv[1]))
+        model.eval()
+        predict(model, big_sample)

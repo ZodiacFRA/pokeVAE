@@ -16,8 +16,7 @@ def train(epoch, warmup_factor, model, optimizer, dataloader):
     train_loss = 0
     for batch_idx, data in enumerate(dataloader):
         data = data.to(DEVICE)
-        # data = data.transpose(1, 3)
-        # print("data train", data.shape)
+        # data = data.transpose(1, 3)  # Needed for conv layers
         optimizer.zero_grad()
         recon_batch, mu, logvar = model(data)
         loss = model.loss_function(recon_batch, data, mu, logvar, warmup_factor)
@@ -54,17 +53,17 @@ if __name__ == '__main__':
         print('='*50, "Training")
         for epoch in range(0, EPOCHS):
             warmup_factor = min(1, epoch / WARMUP_TIME)
-            # Save preview
+            train(epoch, warmup_factor, model, optimizer, train_dataloader)
             if epoch % LOG_INTERVAL == 0:
+                # Check with a prediction
                 with torch.no_grad():
                     res = model.decode(rand_sample).cpu()
+                # Save preview
                 torchvision.utils.save_image(
                     res.view(n_samples*n_samples, 1, image_size, image_size).cpu(),
                     f"./results/reconstruction_{epoch}.png",
                     nrow=n_samples // 2
                 )
-
-            train(epoch, warmup_factor, model, optimizer, train_dataloader)
 
         torch.save(model.state_dict(), f'./{time.time()}.pth')
     else:

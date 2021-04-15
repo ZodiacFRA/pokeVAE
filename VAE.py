@@ -55,7 +55,7 @@ class VAE(torch.nn.Module):
         # 0.5 * sum(1 + log(sigma^2) - mu^2 - sigma^2)
         KLD = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp())
         res = warmup_factor * KLD + BCE
-        res = min(res, 50_000)
+        # res = min(res, 50_000)
         return res
 
 

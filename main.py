@@ -99,4 +99,4 @@ if __name__ == '__main__':
         model.load_state_dict(torch.load(sys.argv[1]))
         model.eval()
         predict(model, get_sample(n, (-7, 7), (-2, 7)), '0', n)
-        predict(model, get_sample(n, (-2, 7), (-7, 7)), '0', n)
+        predict(model, get_sample(n, (-2, 7), (-7, 7)), '1', n)

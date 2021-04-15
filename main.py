@@ -87,6 +87,7 @@ if __name__ == '__main__':
     # os_sample = model.sample(10)
 
     if len(sys.argv) == 1:
+        print("training")
         for epoch in range(0, EPOCHS):
             warmup_factor = min(1, epoch / WARMUP_TIME)
             if epoch % LOG_INTERVAL == 0:
@@ -94,6 +95,7 @@ if __name__ == '__main__':
             train(epoch, warmup_factor, model, optimizer, train_dataloader)
         torch.save(model.state_dict(), f'./{time.time()}.pth')
     else:
+        print("testing")
         model.load_state_dict(torch.load(sys.argv[1]))
         model.eval()
         predict(model, big_sample)

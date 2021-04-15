@@ -58,6 +58,7 @@ def predict(model, sample, epoch, n):
 
 
 def get_sample(n, start, end):
+    print('@', n)
     props = []
     xl = np.arange(start[0], end[0], (end[0] - start[0])/n)
     yl = np.arange(start[1], end[1], (end[1] - start[1])/n)
@@ -85,6 +86,7 @@ if __name__ == '__main__':
     n = 40
     print(n, 'fijoeij')
     big_sample = get_sample(n, (-7, 7), (-2, 7))
+    print('lfiejilejf')
     # os_sample = model.sample(10)
 
     if len(sys.argv) == 1:

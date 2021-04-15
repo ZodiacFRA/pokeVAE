@@ -1,13 +1,9 @@
 #!/usr/bin/env python3
 import sys
 import time
-from pprint import pprint
 
 import torch
 import torchvision
-from torchvision import utils, transforms
-import matplotlib.pyplot as plt
-import numpy as np
 
 from GLOBALS import *
 from VAE import VAE
@@ -36,36 +32,22 @@ def train(epoch, warmup_factor, model, optimizer, dataloader):
     print(f"====> Epoch: {epoch} Average loss: {(train_loss / len(dataloader.dataset)):.4f}, Warmup Factor: {warmup_factor}")
 
 
-def predict_square(model, sample, epoch, n_samples):
-    with torch.no_grad():
-        res = model.decode(sample).cpu()
-        torchvision.utils.save_image(res.view(n_samples*n_samples, 1, 64, 64).cpu(), f"./results/reconstruction_{epoch}.png", nrow=n_samples)
-
-
-def predict_line(model, sample, epoch, n_samples):
-    with torch.no_grad():
-        res = model.decode(sample).cpu()
-        torchvision.utils.save_image(res.view(n_samples, 1, 64, 64).cpu(), f"./results/reconstruction_{epoch}.png", nrow=n_samples//2)
-
-
 if __name__ == '__main__':
+    image_size = 64
     train_dataset = PokemonDataset(
+        draw_samples=True,
         csv_file='./pokemons/pokemon.csv',
         root_dir='./pokemons/images',
-        transform=transforms.Compose([
-            Rescale(64),
+        transform=torchvision.transforms.Compose([
+            Rescale(image_size),
             ToTensor()
         ]))
 
-    # draw_dataset_sample(train_dataset)
-    # exit()
-
     train_dataloader = torch.utils.data.DataLoader(train_dataset, batch_size=BATCH_SIZE)
-    model = VAE(64).to(DEVICE)
+    model = VAE(image_size).to(DEVICE)
     optimizer = torch.optim.Adam(model.parameters(), lr=LEARNING_RATE)
     print(model)
 
-    # Create 2D representation by varying the value of each latent variable
     n_samples = 40
     # big_sample = get_sample(n, (-7, -7), (7, 7))
     rand_sample = torch.randn(n_samples*n_samples, LATENT_SPACE_SIZE).to(DEVICE)
@@ -74,13 +56,28 @@ if __name__ == '__main__':
         print('='*50, "Training")
         for epoch in range(0, EPOCHS):
             warmup_factor = min(1, epoch / WARMUP_TIME)
+            # Save preview
             if epoch % LOG_INTERVAL == 0:
-                predict_line(model, rand_sample, epoch, n_samples)
+                with torch.no_grad():
+                    res = model.decode(rand_sample).cpu()
+                torchvision.utils.save_image(
+                    res.view(n_samples*n_samples, 1, image_size, image_size).cpu(),
+                    f"./results/reconstruction_{epoch}.png",
+                    nrow=n_samples // 2
+                )
+
             train(epoch, warmup_factor, model, optimizer, train_dataloader)
+            torch.nn.utils.clip_grad_value_(model.parameters(), 100_000)
+
         torch.save(model.state_dict(), f'./{time.time()}.pth')
     else:
         print('='*50, "Testing")
         model.load_state_dict(torch.load(sys.argv[1]))
         model.eval()
-        # y / x
-        predict_square(model, rand_sample, 'Test', n_samples)
+        with torch.no_grad():
+            res = model.decode(sample).cpu()
+        torchvision.utils.save_image(
+            res.view(n_samples*n_samples, 1, image_size, image_size).cpu(),
+            f"./results/reconstruction_{epoch}.png",
+            nrow=n_samples // 2
+        )

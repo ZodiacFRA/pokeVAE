@@ -1,11 +1,11 @@
 import torch
-from skimage import io, transform
+import matplotlib.pyplot as plt
 import numpy as np
+from skimage import io, transform
 
 
 class Rescale(object):
     """Rescale the image in a sample to a given size.
-
     Args:
         output_size (tuple or int): Desired output size. If tuple, output is
             matched to output_size. If int, smaller of image edges is matched
@@ -37,22 +37,8 @@ class ToTensor(object):
         return torch.from_numpy(sample.astype(np.float32))
 
 
-def draw_dataset_sample(train_dataset):
-    fig = plt.figure()
-    fig.patch.set_facecolor('#222222')
-    for i in range(len(train_dataset)):
-        sample = train_dataset[i]
-        print(i, sample.shape)
-        ax = plt.subplot(1, 4, i + 1)
-        plt.tight_layout()
-        ax.axis('off')
-        plt.imshow(sample)
-        if i == 3:
-            plt.show()
-            break
-
-
 def get_sample(n, start, end):
+    """ Create 2D representation by varying the value of each latent variable """
     props = []
     xl = np.arange(start[0], end[0], (end[0] - start[0]) / n)
     yl = np.arange(start[1], end[1], (end[1] - start[1]) / n)

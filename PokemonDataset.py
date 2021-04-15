@@ -10,7 +10,7 @@ from utils import *
 
 
 class PokemonDataset(torch.utils.data.Dataset):
-    def __init__(self, csv_file, root_dir, transform=None):
+    def __init__(self, draw_samples, csv_file, root_dir, transform=None):
         """
         Args:
             csv_file (string): Path to the csv file with annotations.
@@ -21,6 +21,8 @@ class PokemonDataset(torch.utils.data.Dataset):
         self.name_frame = pd.read_csv(csv_file)
         self.root_dir = root_dir
         self.transform = transform
+        if draw_samples:
+            self.draw_dataset_sample()
 
     def __len__(self):
         return len(self.name_frame)
@@ -41,6 +43,20 @@ class PokemonDataset(torch.utils.data.Dataset):
             image = self.transform(image)
         image = image[:64, :64]
         return image
+
+    def draw_dataset_sample(self):
+        fig = plt.figure()
+        fig.patch.set_facecolor('#222222')
+        for i in range(len(self)):
+            sample = self[i]
+            print(i, sample.shape)
+            ax = plt.subplot(1, 4, i + 1)
+            plt.tight_layout()
+            ax.axis('off')
+            plt.imshow(sample)
+            if i == 3:
+                plt.show()
+                break
 
 
 def show_name(image, name):

@@ -47,34 +47,16 @@ class VAE(torch.nn.Module):
         return mu + eps * std
 
     # Reconstruction + KL divergence losses summed over all elements and batch
-    def loss_function(self, recon_x, x, mu, logvar, warmup_factor):
-        BCE = torch.nn.functional.binary_cross_entropy(recon_x, x.view(-1, self.pixels_nbr), reduction='sum')
+    def loss_function(self, prediction, x, mu, logvar, warmup_factor):
+        BCE = torch.nn.functional.binary_cross_entropy(prediction, x.view(-1, self.pixels_nbr), reduction='sum')
         # see Appendix B from VAE paper:
         # Kingma and Welling. Auto-Encoding Variational Bayes. ICLR, 2014
         # https://arxiv.org/abs/1312.6114
         # 0.5 * sum(1 + log(sigma^2) - mu^2 - sigma^2)
         KLD = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp())
-        return warmup_factor * KLD + BCE
-
-
-def train(epoch, warmup_factor, model, optimizer, dataloader):
-    model.train()
-    train_loss = 0
-    for batch_idx, (data, _) in enumerate(dataloader):
-        data = data.to(DEVICE)
-        optimizer.zero_grad()
-        recon_batch, mu, logvar = model(data)
-        loss = loss_function(recon_batch, data, mu, logvar, warmup_factor)
-        loss.backward()
-        train_loss += loss.item()
-        optimizer.step()
-        if batch_idx % LOG_INTERVAL == 0:
-            print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
-                epoch, batch_idx * len(data), len(dataloader.dataset),
-                100. * batch_idx / len(dataloader),
-                loss.item() / len(data)))
-
-    print(f"====> Epoch: {epoch} Average loss: {(train_loss / len(dataloader.dataset)):.4f}")
+        # print(KLD)
+        res = warmup_factor * KLD + BCE
+        return res
 
 
 def test(epoch, model, dataloader):

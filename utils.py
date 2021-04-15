@@ -28,7 +28,6 @@ class Rescale(object):
 
         new_h, new_w = int(new_h), int(new_w)
         img = transform.resize(sample, (new_h, new_w))
-
         return img
 
 
@@ -36,3 +35,28 @@ class ToTensor(object):
     """Convert ndarrays in sample to Tensors."""
     def __call__(self, sample):
         return torch.from_numpy(sample.astype(np.float32))
+
+
+def draw_dataset_sample(train_dataset):
+    fig = plt.figure()
+    fig.patch.set_facecolor('#222222')
+    for i in range(len(train_dataset)):
+        sample = train_dataset[i]
+        print(i, sample.shape)
+        ax = plt.subplot(1, 4, i + 1)
+        plt.tight_layout()
+        ax.axis('off')
+        plt.imshow(sample)
+        if i == 3:
+            plt.show()
+            break
+
+
+def get_sample(n, start, end):
+    props = []
+    xl = np.arange(start[0], end[0], (end[0] - start[0]) / n)
+    yl = np.arange(start[1], end[1], (end[1] - start[1]) / n)
+    for x in xl:
+        for y in yl:
+            props.append((x, y))
+    return torch.FloatTensor(props).to(DEVICE)

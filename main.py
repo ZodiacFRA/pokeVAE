@@ -36,35 +36,16 @@ def train(epoch, warmup_factor, model, optimizer, dataloader):
     print(f"====> Epoch: {epoch} Average loss: {(train_loss / len(dataloader.dataset)):.4f}, Warmup Factor: {warmup_factor}")
 
 
-def draw_dataset_sample(train_dataset):
-    fig = plt.figure()
-    fig.patch.set_facecolor('#222222')
-    for i in range(len(train_dataset)):
-        sample = train_dataset[i]
-        print(i, sample.shape)
-        ax = plt.subplot(1, 4, i + 1)
-        plt.tight_layout()
-        ax.axis('off')
-        plt.imshow(sample)
-        if i == 3:
-            plt.show()
-            break
-
-
-def predict(model, sample, epoch, n):
+def predict_square(model, sample, epoch, n_samples):
     with torch.no_grad():
         res = model.decode(sample).cpu()
-        torchvision.utils.save_image(res.view(n*n, 1, 64, 64).cpu(), f"./results/reconstruction_{epoch}.png", nrow=n)
+        torchvision.utils.save_image(res.view(n_samples*n_samples, 1, 64, 64).cpu(), f"./results/reconstruction_{epoch}.png", nrow=n)
 
 
-def get_sample(n, start, end):
-    props = []
-    xl = np.arange(start[0], end[0], (end[0] - start[0]) / n)
-    yl = np.arange(start[1], end[1], (end[1] - start[1]) / n)
-    for x in xl:
-        for y in yl:
-            props.append((x, y))
-    return torch.FloatTensor(props).to(DEVICE)
+def predict_line(model, sample, epoch, n_samples):
+    with torch.no_grad():
+        res = model.decode(sample).cpu()
+        torchvision.utils.save_image(res.view(n_samples, 1, 64, 64).cpu(), f"./results/reconstruction_{epoch}.png", nrow=n_samples//2)
 
 
 if __name__ == '__main__':
@@ -85,21 +66,21 @@ if __name__ == '__main__':
     print(model)
 
     # Create 2D representation by varying the value of each latent variable
-    n = 40
-    big_sample = get_sample(n, (-7, -7), (7, 7))
-    # os_sample = model.sample(10)
+    n_samples = 8
+    # big_sample = get_sample(n, (-7, -7), (7, 7))
+    rand_sample = torch.randn(n_samples, LATENT_SPACE_SIZE).to(DEVICE)
 
     if len(sys.argv) == 1:
-        print("training")
+        print('='*50, "Training")
         for epoch in range(0, EPOCHS):
             warmup_factor = min(1, epoch / WARMUP_TIME)
             if epoch % LOG_INTERVAL == 0:
-                predict(model, big_sample, epoch, n)
+                predict_line(model, rand_sample, epoch, n_samples)
             train(epoch, warmup_factor, model, optimizer, train_dataloader)
         torch.save(model.state_dict(), f'./{time.time()}.pth')
     else:
-        print("testing")
+        print('='*50, "Testing")
         model.load_state_dict(torch.load(sys.argv[1]))
         model.eval()
         # y / x
-        predict(model, get_sample(n, (0, -5), (8, 5)), '1', n)
+        predict_line(model, rand_sample, 'Test', n_samples)

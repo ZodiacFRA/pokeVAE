@@ -47,8 +47,8 @@ if __name__ == '__main__':
     print(model)
 
     n_samples = 40
-    # big_sample = get_sample(n, (-7, -7), (7, 7))
-    rand_sample = torch.randn(n_samples*n_samples, LATENT_SPACE_SIZE).to(DEVICE)
+    big_sample = get_sample(n, (-5, -5), (5, 5))
+    # rand_sample = torch.randn(n_samples*n_samples, LATENT_SPACE_SIZE).to(DEVICE)
 
     if len(sys.argv) == 1:
         print('='*50, "Training")
@@ -58,7 +58,7 @@ if __name__ == '__main__':
             if epoch % LOG_INTERVAL == 0:
                 # Check with a prediction
                 with torch.no_grad():
-                    res = model.decode(rand_sample).cpu()
+                    res = model.decode(big_sample).cpu()
                 # Save preview
                 torchvision.utils.save_image(
                     res.view(n_samples*n_samples, 1, image_size, image_size).cpu(),

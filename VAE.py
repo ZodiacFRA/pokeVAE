@@ -65,9 +65,9 @@ class VAE(torch.nn.Module):
         BCE = torch.nn.functional.binary_cross_entropy(prediction, x.view(-1, self.pixels_nbr), reduction='sum')
         KLD = -0.5 * torch.sum(1 + var - mu.pow(2) - var.exp())
         res = warmup_factor * KLD + BCE
-        print("===================================")
-        print('wu factor:', warmup_factor, 'KLD:', KLD, 'BCE:', BCE)
-        print('loss:', res)
+        # print("===================================")
+        # print('wu factor:', warmup_factor, 'KLD:', KLD, 'BCE:', BCE)
+        # print('loss:', res)
         return res
 
 

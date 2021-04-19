@@ -47,7 +47,7 @@ if __name__ == '__main__':
     print(model)
 
     n_samples = 40
-    big_sample = get_sample(n, (-5, -5), (5, 5))
+    big_sample = get_sample(n_samples, (-5, -5), (5, 5))
     # rand_sample = torch.randn(n_samples*n_samples, LATENT_SPACE_SIZE).to(DEVICE)
 
     if len(sys.argv) == 1:

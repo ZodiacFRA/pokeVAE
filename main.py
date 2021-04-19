@@ -20,7 +20,7 @@ def train(epoch, warmup_factor, model, optimizer, dataloader):
         optimizer.zero_grad()
         recon_batch, mu, logvar = model(data)
         loss = model.loss_function(recon_batch, data, mu, logvar, warmup_factor)
-        print(f"loss={loss}, mu={mu}, logvar={logvar}")
+        # print(f"loss={loss}, mu={mu}, logvar={logvar}")
         loss.backward()
         # torch.nn.utils.clip_grad_norm(model.parameters(), 1.0)
         train_loss += loss.item()

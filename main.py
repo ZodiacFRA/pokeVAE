@@ -63,7 +63,7 @@ if __name__ == '__main__':
                 torchvision.utils.save_image(
                     res.view(n_samples*n_samples, 1, image_size, image_size).cpu(),
                     f"./results/reconstruction_{epoch}.png",
-                    nrow=n_samples // 2
+                    nrow=n_samples
                 )
 
         torch.save(model.state_dict(), f'./{time.time()}.pth')
@@ -76,5 +76,5 @@ if __name__ == '__main__':
         torchvision.utils.save_image(
             res.view(n_samples*n_samples, 1, image_size, image_size).cpu(),
             f"./results/reconstruction_{epoch}.png",
-            nrow=n_samples // 2
+            nrow=n_samples
         )

@@ -18,14 +18,12 @@ def train(epoch, warmup_factor, model, optimizer, dataloader):
     for batch_idx, data in enumerate(dataloader):
         data = data.to(DEVICE)
 
-        # data = data.transpose(1, 3)  # Needed for conv layers
+        data = data.transpose(1, 3)  # Needed for conv layers
 
         optimizer.zero_grad()
         recon_batch, mu, logvar = model(data)
         loss = model.loss_function(recon_batch, data, mu, logvar, warmup_factor)
-        # print(f"loss={loss}, mu={mu}, logvar={logvar}")
         loss.backward()
-        # torch.nn.utils.clip_grad_norm(model.parameters(), 1.0)
         train_loss += loss.item()
         optimizer.step()
         if batch_idx % LOG_INTERVAL == 0:
@@ -42,14 +40,14 @@ if __name__ == '__main__':
         root_dir='./pokemons/images',
         transform=torchvision.transforms.Compose([
             Rescale(image_size),
-            SetChannels(image_size, channels_nbr, pad=False),
+            SetChannels(image_size, channels_nbr, pad=True),
             ToTensor()
         ]))
 
     # train_dataset.draw_dataset_sample()
     # exit()
     train_dataloader = torch.utils.data.DataLoader(train_dataset, batch_size=BATCH_SIZE)
-    model = VAE(image_size, channels_nbr).to(DEVICE)
+    model = cVAE(image_size, channels_nbr).to(DEVICE)
     optimizer = torch.optim.Adam(model.parameters(), lr=LEARNING_RATE)
     print(model)
 

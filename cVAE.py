@@ -3,9 +3,9 @@ import torchvision
 from GLOBALS import *
 
 
-class Flatten(torch.nn.Module):
-    def forward(self, input):
-        return input.view(input.size(0), -1)
+# class Flatten(torch.nn.Module):
+#     def forward(self, input):
+#         return input.view(input.size(0), -1)
 
 
 class UnFlatten(torch.nn.Module):
@@ -27,15 +27,13 @@ class cVAE(torch.nn.Module):
             torch.nn.ReLU(),
             torch.nn.Conv2d(128, 256, kernel_size=4, stride=2),
             torch.nn.ReLU(),
-            Flatten(),
         )
         # Latent
         self.mu = torch.nn.Linear(256*4, LATENT_SPACE_SIZE)
         self.var = torch.nn.Linear(256*4, LATENT_SPACE_SIZE)
-        self.decoder_input = torch.nn.Linear(LATENT_SPACE_SIZE, 256*4)
+        self.prepare_input_for_decoding = torch.nn.Linear(LATENT_SPACE_SIZE, 256*4)
 
         self.decoder = torch.nn.Sequential(
-            UnFlatten(),
             torch.nn.ConvTranspose2d(256*4, 128, kernel_size=5, stride=2),
             torch.nn.ReLU(),
             torch.nn.ConvTranspose2d(128, 64, kernel_size=5, stride=2),
@@ -47,25 +45,28 @@ class cVAE(torch.nn.Module):
 
     def encode(self, input):
         result = self.encoder(input)
+        # Flatten the image for the linear layers
+        result = result.view(result.size(0), -1)
         # Split the result into mu and var components
         # of the latent Gaussian distribution
         return self.mu(result), self.var(result)
 
     def decode(self, z):
+        z = self.prepare_input_for_decoding(z)
+        # Unflatten the latent values
+        z = z.view(z.size(0), 1024, 1, 1)
         result = self.decoder(z)
         return torch.sigmoid(result)
 
     def forward(self, input):
-        print(input.shape)
-
         mu, var = self.encode(input)
         # Sample
-        z = self.reparameterize(mu, var)
-        z = self.decoder_input(z)
+        z = self.sample(mu, var)
         # Decode from sampled values
-        return self.decode(z), mu, var
+        res = self.decode(z)
+        return res, mu, var
 
-    def reparameterize(self, mu, var):
+    def sample(self, mu, var):
         # Standard deviation
         std = torch.exp(0.5*var)
         # Sample from the distribution, std is only given as an indicator of the
@@ -74,33 +75,12 @@ class cVAE(torch.nn.Module):
         # so multiply and add to take our values into account
         return mu + eps * std
 
-    # Reconstruction + KL divergence losses summed over all elements and batch
-    def loss_function(self, prediction, x, mu, var, warmup_factor):
-        # see Appendix B from VAE paper:
-        # Kingma and Welling. Auto-Encoding Variational Bayes. ICLR, 2014
-        # https://arxiv.org/abs/1312.6114
-        # 0.5 * sum(1 + log(sigma^2) - mu^2 - sigma^2)
-        BCE = torch.nn.functional.binary_cross_entropy(prediction, x.view(-1, self.pixels_nbr), reduction='sum')
+    def loss_function(self, prediction, input, mu, var, warmup_factor):
+        """ Reconstruction + KL divergence losses summed over all elements and batch """
+        BCE = torch.nn.functional.binary_cross_entropy(prediction, input, reduction='sum')
         KLD = -0.5 * torch.sum(1 + var - mu.pow(2) - var.exp())
         res = warmup_factor * KLD + BCE
         # print("===================================")
         # print('wu factor:', warmup_factor, 'KLD:', KLD, 'BCE:', BCE)
         # print('loss:', res)
         return res
-
-
-def test(epoch, model, dataloader):
-    model.eval()
-    test_loss = 0
-    with torch.no_grad():
-        for i, (data, _) in enumerate(dataloader):
-            data = data.to(DEVICE)
-            recon_batch, mu, var = model(data)
-            test_loss += loss_function(recon_batch, data, mu, var, 1).item()
-            # if i == 0:
-            #     n = min(data.size(0), 8)
-            #     comparison = torch.cat([data[:n], recon_batch.view(BATCH_SIZE, 1, 28, 28)[:n]])
-            #     torchvision.utils.save_image(comparison.cpu(), './results/reconstruction_' + str(epoch) + '.png', nrow=n)
-
-    test_loss /= len(dataloader.dataset)
-    print(f"====> Test set loss: {test_loss:.4f}")

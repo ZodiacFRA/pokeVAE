@@ -31,7 +31,6 @@ class VAE(torch.nn.Module):
             torch.nn.Linear(1024, 2048),
             torch.nn.ReLU(),
             torch.nn.Linear(2048, self.pixels_nbr),
-            torch.nn.ReLU(),
         )
 
     def encode(self, input):

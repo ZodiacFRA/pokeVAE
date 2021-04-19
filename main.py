@@ -43,7 +43,7 @@ if __name__ == '__main__':
 
     train_dataloader = torch.utils.data.DataLoader(train_dataset, batch_size=BATCH_SIZE)
     model = VAE(image_size).to(DEVICE)
-    optimizer = torch.optim.Adam(model.parameters(), lr=LEARNING_RATE, weight_decay=1e-5)
+    optimizer = torch.optim.Adam(model.parameters(), lr=LEARNING_RATE)
     print(model)
 
     n_samples = 40

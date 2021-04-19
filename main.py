@@ -21,7 +21,7 @@ def train(epoch, warmup_factor, model, optimizer, dataloader):
         recon_batch, mu, logvar = model(data)
         loss = model.loss_function(recon_batch, data, mu, logvar, warmup_factor)
         loss.backward()
-        torch.nn.utils.clip_grad_norm(model.parameters(), 1.0)
+        # torch.nn.utils.clip_grad_norm(model.parameters(), 1.0)
         train_loss += loss.item()
         optimizer.step()
         if batch_idx % LOG_INTERVAL == 0:
@@ -42,7 +42,7 @@ if __name__ == '__main__':
 
     train_dataloader = torch.utils.data.DataLoader(train_dataset, batch_size=BATCH_SIZE)
     model = VAE(image_size).to(DEVICE)
-    optimizer = torch.optim.Adam(model.parameters(), lr=LEARNING_RATE)
+    optimizer = torch.optim.Adam(model.parameters(), lr=LEARNING_RATE, weight_decay=1e-5)
     print(model)
 
     n_samples = 40

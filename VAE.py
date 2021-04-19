@@ -38,9 +38,7 @@ class VAE(torch.nn.Module):
         result = self.encoder(input)
         # Split the result into mu and var components
         # of the latent Gaussian distribution
-        mu = self.mu(result)
-        log_var = self.var(result)
-        return mu, log_var
+        return self.mu(result), self.var(result)
 
     def decode(self, z):
         result = self.decoder(z)

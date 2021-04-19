@@ -48,12 +48,18 @@ class VAE(torch.nn.Module):
 
     def forward(self, x):
         mu, var = self.encode(x.view(-1, self.pixels_nbr))
+        # Sample
         z = self.reparameterize(mu, var)
+        # Decode from sampled values
         return self.decode(z), mu, var
 
     def reparameterize(self, mu, var):
+        # Standard deviation
         std = torch.exp(0.5*var)
+        # Sample from the distribution, std is only given as an indicator of the
+        # shape needed, randn_like uses a mean of 0 and a variance of 1
         eps = torch.randn_like(std)
+        # so multiply and add to take our values into account
         return mu + eps * std
 
     # Reconstruction + KL divergence losses summed over all elements and batch

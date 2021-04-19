@@ -53,7 +53,7 @@ if __name__ == '__main__':
     if len(sys.argv) == 1:
         print('='*50, "Training")
         for epoch in range(0, EPOCHS):
-            warmup_factor = min(1, epoch / WARMUP_TIME)
+            warmup_factor = min(1, (epoch + 1) / WARMUP_TIME)
             train(epoch, warmup_factor, model, optimizer, train_dataloader)
             if epoch % LOG_INTERVAL == 0:
                 # Check with a prediction

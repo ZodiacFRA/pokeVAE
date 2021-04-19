@@ -2,6 +2,8 @@ import torch
 import matplotlib.pyplot as plt
 import numpy as np
 from skimage import io, transform
+from skimage.color import rgb2gray
+
 
 from GLOBALS import *
 
@@ -37,6 +39,25 @@ class ToTensor(object):
     """Convert ndarrays in sample to Tensors."""
     def __call__(self, sample):
         return torch.from_numpy(sample.astype(np.float32))
+
+
+class SetChannels(object):
+    """Convert ndarrays in sample to Tensors."""
+    def __init__(self, output_size, channels_nbr, pad=True):
+        self.channels_nbr = channels_nbr
+        self.output_size = output_size
+        self.pad = pad
+
+    def __call__(self, sample):
+        if self.channels_nbr == 1:
+            sample = rgb2gray(sample)
+            if self.pad:
+                sample = sample[:self.output_size, :self.output_size, None]
+            else:
+                sample = sample[:self.output_size, :self.output_size]
+        else:
+            sample = sample[:self.output_size, :self.output_size, :self.channels_nbr]
+        return sample
 
 
 def get_sample(n, start, end):

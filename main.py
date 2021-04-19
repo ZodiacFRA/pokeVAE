@@ -6,6 +6,7 @@ import torch
 import torchvision
 
 from GLOBALS import *
+from cVAE import cVAE
 from VAE import VAE
 from PokemonDataset import PokemonDataset
 from utils import *
@@ -16,7 +17,9 @@ def train(epoch, warmup_factor, model, optimizer, dataloader):
     train_loss = 0
     for batch_idx, data in enumerate(dataloader):
         data = data.to(DEVICE)
+
         # data = data.transpose(1, 3)  # Needed for conv layers
+
         optimizer.zero_grad()
         recon_batch, mu, logvar = model(data)
         loss = model.loss_function(recon_batch, data, mu, logvar, warmup_factor)
@@ -32,17 +35,21 @@ def train(epoch, warmup_factor, model, optimizer, dataloader):
 
 if __name__ == '__main__':
     image_size = 64
+    channels_nbr = 1
     train_dataset = PokemonDataset(
         draw_samples=False,
         csv_file='./pokemons/pokemon.csv',
         root_dir='./pokemons/images',
         transform=torchvision.transforms.Compose([
             Rescale(image_size),
+            SetChannels(image_size, channels_nbr, pad=False),
             ToTensor()
         ]))
 
+    # train_dataset.draw_dataset_sample()
+    # exit()
     train_dataloader = torch.utils.data.DataLoader(train_dataset, batch_size=BATCH_SIZE)
-    model = VAE(image_size).to(DEVICE)
+    model = VAE(image_size, channels_nbr).to(DEVICE)
     optimizer = torch.optim.Adam(model.parameters(), lr=LEARNING_RATE)
     print(model)
 
@@ -61,7 +68,7 @@ if __name__ == '__main__':
                     res = model.decode(big_sample).cpu()
                 # Save preview
                 torchvision.utils.save_image(
-                    res.view(n_samples*n_samples, 1, image_size, image_size).cpu(),
+                    res.view(n_samples*n_samples, channels_nbr, image_size, image_size).cpu(),
                     f"./results/reconstruction_{epoch}.png",
                     nrow=n_samples
                 )
@@ -74,7 +81,7 @@ if __name__ == '__main__':
         with torch.no_grad():
             res = model.decode(sample).cpu()
         torchvision.utils.save_image(
-            res.view(n_samples*n_samples, 1, image_size, image_size).cpu(),
+            res.view(n_samples*n_samples, channels_nbr, image_size, image_size).cpu(),
             f"./results/reconstruction_{epoch}.png",
             nrow=n_samples
         )

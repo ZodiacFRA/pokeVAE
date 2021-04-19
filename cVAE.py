@@ -3,13 +3,8 @@ import torchvision
 from GLOBALS import *
 
 
-# class Flatten(torch.nn.Module):
-#     def forward(self, input):
-#         return input.view(input.size(0), -1)
-
-
 class UnFlatten(torch.nn.Module):
-    def forward(self, input, size=1024):
+    def forward(self, input, size=2048):
         return input.view(input.size(0), size, 1, 1)
 
 
@@ -25,16 +20,16 @@ class cVAE(torch.nn.Module):
             torch.nn.ReLU(),
             torch.nn.Conv2d(64, 128, kernel_size=4, stride=2),
             torch.nn.ReLU(),
-            torch.nn.Conv2d(128, 256, kernel_size=4, stride=2),
+            torch.nn.Conv2d(128, 512, kernel_size=4, stride=2),
             torch.nn.ReLU(),
         )
         # Latent
-        self.mu = torch.nn.Linear(256*4, LATENT_SPACE_SIZE)
-        self.var = torch.nn.Linear(256*4, LATENT_SPACE_SIZE)
-        self.prepare_input_for_decoding = torch.nn.Linear(LATENT_SPACE_SIZE, 256*4)
+        self.mu = torch.nn.Linear(512*4, LATENT_SPACE_SIZE)
+        self.var = torch.nn.Linear(512*4, LATENT_SPACE_SIZE)
+        self.prepare_input_for_decoding = torch.nn.Linear(LATENT_SPACE_SIZE, 512*4)
 
         self.decoder = torch.nn.Sequential(
-            torch.nn.ConvTranspose2d(256*4, 128, kernel_size=5, stride=2),
+            torch.nn.ConvTranspose2d(512*4, 128, kernel_size=5, stride=2),
             torch.nn.ReLU(),
             torch.nn.ConvTranspose2d(128, 64, kernel_size=5, stride=2),
             torch.nn.ReLU(),
@@ -54,7 +49,7 @@ class cVAE(torch.nn.Module):
     def decode(self, z):
         z = self.prepare_input_for_decoding(z)
         # Unflatten the latent values
-        z = z.view(z.size(0), 1024, 1, 1)
+        z = z.view(z.size(0), 2048, 1, 1)
         result = self.decoder(z)
         return torch.sigmoid(result)
 

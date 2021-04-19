@@ -72,6 +72,24 @@ if __name__ == '__main__':
                 )
 
         torch.save(model.state_dict(), f'./{time.time()}.pth')
+    elif len(sys.argv) == 2:
+        model.load_state_dict(torch.load(sys.argv[1]))
+        model.eval()
+        for epoch in range(0, sys.argv[2]):
+            warmup_factor = min(1, (epoch + 1) / WARMUP_TIME)
+            train(epoch, warmup_factor, model, optimizer, train_dataloader)
+            if epoch % LOG_INTERVAL == 0:
+                # Check with a prediction
+                with torch.no_grad():
+                    res = model.decode(big_sample).cpu()
+                # Save preview
+                torchvision.utils.save_image(
+                    res.view(n_samples*n_samples, channels_nbr, image_size, image_size).cpu(),
+                    f"./results/reconstruction_{epoch}.png",
+                    nrow=n_samples
+                )
+
+        torch.save(model.state_dict(), f'./{time.time()}_RESUMED.pth')
     else:
         print('='*50, "Testing")
         model.load_state_dict(torch.load(sys.argv[1]))

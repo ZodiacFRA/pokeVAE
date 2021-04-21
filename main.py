@@ -5,11 +5,12 @@ import time
 import torch
 import torchvision
 
-from GLOBALS import *
-from cVAE import cVAE
 from VAE import VAE
+from cVAE import cVAE
+from HybridVAE import HybridVAE
 from PokemonDataset import PokemonDataset
 from utils import *
+from GLOBALS import *
 
 
 def train(epoch, warmup_factor, model, optimizer, dataloader):
@@ -33,7 +34,7 @@ def train(epoch, warmup_factor, model, optimizer, dataloader):
 
 if __name__ == '__main__':
     image_size = 64
-    channels_nbr = 3
+    channels_nbr = 1
     train_dataset = PokemonDataset(
         draw_samples=False,
         csv_file='./pokemons/pokemon.csv',
@@ -47,13 +48,13 @@ if __name__ == '__main__':
     # train_dataset.draw_dataset_sample()
     # exit()
     train_dataloader = torch.utils.data.DataLoader(train_dataset, batch_size=BATCH_SIZE)
-    model = cVAE(image_size, channels_nbr).to(DEVICE)
+    model = HybridVAE(image_size, channels_nbr).to(DEVICE)
     optimizer = torch.optim.Adam(model.parameters(), lr=LEARNING_RATE)
     print(model)
 
     n_samples = 40
-    # big_sample = get_sample(n_samples, (-5, -5), (5, 5))
-    rand_sample = torch.randn(n_samples*n_samples, LATENT_SPACE_SIZE).to(DEVICE)
+    big_sample = get_sample(n_samples, (-5, -5), (5, 5))
+    # rand_sample = torch.randn(n_samples*n_samples, LATENT_SPACE_SIZE).to(DEVICE)
 
     if len(sys.argv) == 1:
         print('='*50, "Training")
@@ -63,7 +64,7 @@ if __name__ == '__main__':
             if epoch % LOG_INTERVAL == 0:
                 # Check with a prediction
                 with torch.no_grad():
-                    res = model.decode(rand_sample).cpu()
+                    res = model.decode(big_sample).cpu()
                 # Save preview
                 torchvision.utils.save_image(
                     res.view(n_samples*n_samples, channels_nbr, image_size, image_size).cpu(),
@@ -81,7 +82,7 @@ if __name__ == '__main__':
             if epoch % LOG_INTERVAL == 0:
                 # Check with a prediction
                 with torch.no_grad():
-                    res = model.decode(rand_sample).cpu()
+                    res = model.decode(big_sample).cpu()
                 # Save preview
                 torchvision.utils.save_image(
                     res.view(n_samples*n_samples, channels_nbr, image_size, image_size).cpu(),
@@ -95,7 +96,7 @@ if __name__ == '__main__':
         model.load_state_dict(torch.load(sys.argv[1]))
         model.eval()
         with torch.no_grad():
-            res = model.decode(rand_sample).cpu()
+            res = model.decode(big_sample).cpu()
         torchvision.utils.save_image(
             res.view(n_samples*n_samples, channels_nbr, image_size, image_size).cpu(),
             f"./results/reconstruction_{epoch}.png",

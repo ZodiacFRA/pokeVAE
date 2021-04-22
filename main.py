@@ -4,6 +4,7 @@ import time
 
 import torch
 import torchvision
+from torch.utils.tensorboard import SummaryWriter
 
 from VAE import VAE
 from cVAE import cVAE
@@ -13,13 +14,13 @@ from utils import *
 from GLOBALS import *
 
 
-def train(epoch, warmup_factor, model, optimizer, dataloader):
+def train(epoch, warmup_factor, model, optimizer, dataloader, writer):
     model.train()
     train_loss = 0
     for batch_idx, data in enumerate(dataloader):
         data = data.to(DEVICE)
 
-        data = data.transpose(1, 3)  # Needed for conv layers
+        # data = data.transpose(1, 3)  # Needed for conv layers
 
         optimizer.zero_grad()
         recon_batch, mu, logvar = model(data)
@@ -29,7 +30,10 @@ def train(epoch, warmup_factor, model, optimizer, dataloader):
         optimizer.step()
         if batch_idx % LOG_INTERVAL == 0:
             print(f'Train Epoch: {epoch} [{batch_idx * len(data)}/{len(dataloader.dataset)} ({100. * batch_idx / len(dataloader):.0f}%)]\tLoss: {loss.item() / len(data):.6f}')
-    print(f"====> Epoch: {epoch} Average loss: {(train_loss / len(dataloader.dataset)):.4f}, Warmup Factor: {warmup_factor}")
+    avg_loss = train_loss / len(dataloader.dataset)
+    print(f"====> Epoch: {epoch} Average loss: {avg_loss:.4f}, Warmup Factor: {warmup_factor}")
+    writer.add_scalar('Loss', avg_loss, epoch)
+    writer.flush()
 
 
 if __name__ == '__main__':
@@ -41,10 +45,11 @@ if __name__ == '__main__':
         root_dir='./pokemons/images',
         transform=torchvision.transforms.Compose([
             Rescale(image_size),
-            SetChannels(image_size, channels_nbr, pad=True),
+            SetChannels(image_size, channels_nbr, pad=False),
             ToTensor()
         ]))
 
+    writer = SummaryWriter()
     # train_dataset.draw_dataset_sample()
     # exit()
     train_dataloader = torch.utils.data.DataLoader(train_dataset, batch_size=BATCH_SIZE)
@@ -61,17 +66,14 @@ if __name__ == '__main__':
         print('='*50, "Training")
         for epoch in range(0, EPOCHS):
             warmup_factor = min(1, (epoch + 1) / WARMUP_TIME)
-            train(epoch, warmup_factor, model, optimizer, train_dataloader)
+            train(epoch, warmup_factor, model, optimizer, train_dataloader, writer)
             if epoch % LOG_INTERVAL == 0:
                 # Check with a prediction
                 with torch.no_grad():
                     res = model.decode(sample).cpu()
-                # Save preview
-                torchvision.utils.save_image(
-                    res.view(n_samples*n_samples, channels_nbr, image_size, image_size).cpu(),
-                    f"./results/reconstruction_{epoch}.png",
-                    nrow=n_samples
-                )
+                img = res.view(n_samples*n_samples, channels_nbr, image_size, image_size).cpu()
+                grid = torchvision.utils.make_grid(img, nrow=n_samples)
+                writer.add_image(f'reconstruction_{epoch}', grid, 0)
 
         torch.save(model.state_dict(), f'./{time.time()}.pth')
     elif len(sys.argv) == 2:
@@ -79,7 +81,7 @@ if __name__ == '__main__':
         model.eval()
         for epoch in range(0, sys.argv[2]):
             warmup_factor = min(1, (epoch + 1) / WARMUP_TIME)
-            train(epoch, warmup_factor, model, optimizer, train_dataloader)
+            train(epoch, warmup_factor, model, optimizer, train_dataloader, writer)
             if epoch % LOG_INTERVAL == 0:
                 # Check with a prediction
                 with torch.no_grad():
@@ -103,3 +105,4 @@ if __name__ == '__main__':
             f"./results/reconstruction_{epoch}.png",
             nrow=n_samples
         )
+    writer.close()

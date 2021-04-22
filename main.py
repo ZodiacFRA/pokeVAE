@@ -20,7 +20,7 @@ def train(epoch, warmup_factor, model, optimizer, dataloader, writer):
     for batch_idx, data in enumerate(dataloader):
         data = data.to(DEVICE)
 
-        # data = data.transpose(1, 3)  # Needed for conv layers
+        data = data.transpose(1, 3)  # Needed for conv layers
 
         optimizer.zero_grad()
         recon_batch, mu, logvar = model(data)
@@ -45,7 +45,7 @@ if __name__ == '__main__':
         root_dir='./pokemons/images',
         transform=torchvision.transforms.Compose([
             Rescale(image_size),
-            SetChannels(image_size, channels_nbr, pad=False),
+            SetChannels(image_size, channels_nbr, pad=True),
             ToTensor()
         ]))
 

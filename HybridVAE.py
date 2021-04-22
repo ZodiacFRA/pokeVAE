@@ -10,7 +10,7 @@ class Flatten(torch.nn.Module):
 
 class UnFlatten(torch.nn.Module):
     def forward(self, input):
-        return input.view(input.size(0), 32, 15, 15)
+        return input.view(input.size(0), 64, 15, 15)
 
 class Printer(torch.nn.Module):
     def forward(self, input):
@@ -27,10 +27,15 @@ class HybridVAE(torch.nn.Module):
         self.encoder = torch.nn.Sequential(
             torch.nn.Conv2d(self.image_channels, 32, kernel_size=3, stride=2),
             torch.nn.ReLU(),
-            torch.nn.Conv2d(32, 32, kernel_size=3, stride=2),
+            torch.nn.Conv2d(32, 64, kernel_size=3, stride=2),
             torch.nn.ReLU(),
             Flatten(),
-            torch.nn.Linear(7200, 2048),
+            # Printer(),
+            torch.nn.Linear(14400, 8192),
+            torch.nn.ReLU(),
+            torch.nn.Linear(8192, 4096),
+            torch.nn.ReLU(),
+            torch.nn.Linear(4096, 2048),
             torch.nn.ReLU(),
             torch.nn.Linear(2048, self.h_dim),
             torch.nn.ReLU(),
@@ -43,10 +48,15 @@ class HybridVAE(torch.nn.Module):
         self.decoder = torch.nn.Sequential(
             torch.nn.Linear(self.h_dim, 2048),
             torch.nn.ReLU(),
-            torch.nn.Linear(2048, 7200),
+            torch.nn.Linear(2048, 4096),
             torch.nn.ReLU(),
+            torch.nn.Linear(4096, 8192),
+            torch.nn.ReLU(),
+            torch.nn.Linear(8192, 14400),
+            torch.nn.ReLU(),
+            # Printer(),
             UnFlatten(),
-            torch.nn.ConvTranspose2d(32, 32, kernel_size=3, stride=2),
+            torch.nn.ConvTranspose2d(64, 32, kernel_size=3, stride=2),
             torch.nn.ReLU(),
             torch.nn.ConvTranspose2d(32, self.image_channels, kernel_size=4, stride=2),
             torch.nn.Sigmoid(),

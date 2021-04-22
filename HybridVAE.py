@@ -10,7 +10,7 @@ class Flatten(torch.nn.Module):
 
 class UnFlatten(torch.nn.Module):
     def forward(self, input):
-        return input.view(input.size(0), 32, 14, 14)
+        return input.view(input.size(0), 32, 15, 15)
 
 class Printer(torch.nn.Module):
     def forward(self, input):
@@ -25,16 +25,14 @@ class HybridVAE(torch.nn.Module):
         self.h_dim = 512
 
         self.encoder = torch.nn.Sequential(
-            torch.nn.Conv2d(self.image_channels, 32, kernel_size=4, stride=2),
+            torch.nn.Conv2d(self.image_channels, 32, kernel_size=3, stride=2),
             torch.nn.ReLU(),
-            torch.nn.Conv2d(32, 32, kernel_size=4, stride=2),
+            torch.nn.Conv2d(32, 32, kernel_size=3, stride=2),
             torch.nn.ReLU(),
             Flatten(),
-            torch.nn.Linear(6272, 4096),
+            torch.nn.Linear(7200, 2048),
             torch.nn.ReLU(),
-            torch.nn.Linear(4096, 1024),
-            torch.nn.ReLU(),
-            torch.nn.Linear(1024, self.h_dim),
+            torch.nn.Linear(2048, self.h_dim),
             torch.nn.ReLU(),
         )
         # Latent
@@ -43,16 +41,14 @@ class HybridVAE(torch.nn.Module):
         self.prepare_input_for_decoding = torch.nn.Linear(LATENT_SPACE_SIZE, self.h_dim)
 
         self.decoder = torch.nn.Sequential(
-            torch.nn.Linear(self.h_dim, 1024),
+            torch.nn.Linear(self.h_dim, 2048),
             torch.nn.ReLU(),
-            torch.nn.Linear(1024, 4096),
-            torch.nn.ReLU(),
-            torch.nn.Linear(4096, 6272),
+            torch.nn.Linear(2048, 7200),
             torch.nn.ReLU(),
             UnFlatten(),
-            torch.nn.ConvTranspose2d(32, 32, kernel_size=4, stride=2),
+            torch.nn.ConvTranspose2d(32, 32, kernel_size=3, stride=2),
             torch.nn.ReLU(),
-            torch.nn.ConvTranspose2d(32, self.image_channels, kernel_size=6, stride=2),
+            torch.nn.ConvTranspose2d(32, self.image_channels, kernel_size=4, stride=2),
             torch.nn.Sigmoid(),
         )
 

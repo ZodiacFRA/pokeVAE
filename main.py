@@ -34,7 +34,7 @@ def train(epoch, warmup_factor, model, optimizer, dataloader):
 
 if __name__ == '__main__':
     image_size = 64
-    channels_nbr = 3
+    channels_nbr = 1
     train_dataset = PokemonDataset(
         draw_samples=False,
         csv_file='./pokemons/pokemon.csv',

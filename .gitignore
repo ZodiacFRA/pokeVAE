@@ -1,6 +1,7 @@
 __pycache__
 results*
 tmp*
-cluster_results_VAE
+cluster_results
+model_saves
 local
 runs

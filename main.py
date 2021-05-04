@@ -72,8 +72,13 @@ if __name__ == '__main__':
                 with torch.no_grad():
                     res = model.decode(sample).cpu()
                 img = res.view(n_samples*n_samples, channels_nbr, image_size, image_size).cpu()
-                grid = torchvision.utils.make_grid(img, nrow=n_samples)
-                writer.add_image(f'reconstruction_{epoch}', grid, 0)
+                torchvision.utils.save_image(
+                    res.view(n_samples*n_samples, channels_nbr, image_size, image_size).cpu(),
+                    f"./results/reconstruction_{epoch}.png",
+                    nrow=n_samples
+                )
+                # grid = torchvision.utils.make_grid(img, nrow=n_samples)
+                # writer.add_image(f'reconstruction_{epoch}', grid, 0)
 
         torch.save(model.state_dict(), f'./{time.time()}.pth')
     elif len(sys.argv) == 2:

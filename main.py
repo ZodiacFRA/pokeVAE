@@ -20,7 +20,7 @@ def train(epoch, warmup_factor, model, optimizer, dataloader, writer):
     for batch_idx, data in enumerate(dataloader):
         data = data.to(DEVICE)
 
-        data = data.transpose(1, 3)  # Needed for conv layers
+        # data = data.transpose(1, 3)  # Needed for conv layers
 
         optimizer.zero_grad()
         recon_batch, mu, logvar = model(data)
@@ -45,7 +45,7 @@ if __name__ == '__main__':
         root_dir='./pokemons/images',
         transform=torchvision.transforms.Compose([
             Rescale(image_size),
-            SetChannels(image_size, channels_nbr, pad=True),
+            SetChannels(image_size, channels_nbr, pad=False),
             ToTensor()
         ]))
 
@@ -53,14 +53,14 @@ if __name__ == '__main__':
     # train_dataset.draw_dataset_sample()
     # exit()
     train_dataloader = torch.utils.data.DataLoader(train_dataset, batch_size=BATCH_SIZE)
-    model = HybridVAE(image_size, channels_nbr).to(DEVICE)
+    model = VAE(image_size, channels_nbr).to(DEVICE)
     optimizer = torch.optim.Adam(model.parameters(), lr=LEARNING_RATE)
     print(model)
     print(sum(p.numel() for p in model.parameters() if p.requires_grad), "total params")
 
-    n_samples = 40
-    # sample = get_sample(n_samples, (-5, -5), (5, 5))
-    sample = torch.randn(n_samples*n_samples, LATENT_SPACE_SIZE).to(DEVICE)
+    n_samples = 10
+    sample = get_sample(n_samples, (-5, -5), (5, 5))
+    # sample = torch.randn(n_samples*n_samples, LATENT_SPACE_SIZE).to(DEVICE)
 
     if len(sys.argv) == 1:
         print('='*50, "Training")

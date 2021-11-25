@@ -80,7 +80,7 @@ if __name__ == '__main__':
                 # grid = torchvision.utils.make_grid(img, nrow=n_samples)
                 # writer.add_image(f'reconstruction_{epoch}', grid, 0)
 
-        torch.save(model.state_dict(), f'./{time.time()}.pth')
+        torch.save(model.state_dict(), f'./VAE_{time.time()}.pth')
     elif len(sys.argv) == 2:
         model.load_state_dict(torch.load(sys.argv[1]))
         model.eval()

@@ -63,9 +63,13 @@ class SetChannels(object):
 def get_sample(n, start, end):
     """ Create 2D representation by varying the value of each latent variable """
     props = []
-    xl = np.arange(start[0], end[0], (end[0] - start[0]) / n)
-    yl = np.arange(start[1], end[1], (end[1] - start[1]) / n)
-    for x in xl:
-        for y in yl:
-            props.append((x, y))
+    x1_l = np.arange(start[0], end[0], (end[0] - start[0]) / n)
+    y1_l = np.arange(start[1], end[1], (end[1] - start[1]) / n)
+    x2_l = np.arange(start[0], end[0], (end[0] - start[0]) / n)
+    y2_l = np.arange(start[1], end[1], (end[1] - start[1]) / n)
+    for x1 in x1_l:
+        for y1 in y1_l:
+            for x2 in x2_l:
+                for y2 in y2_l:
+                    props.append((x1, y1, x2, y2))
     return torch.FloatTensor(props).to(DEVICE)
